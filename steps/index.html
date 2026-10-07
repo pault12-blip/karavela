@@ -51,4 +51,22 @@ plot(basis - mult * rng, "Lower", color.purple)`);
   osc.addNativeIndicator('ultimate-oscillator');
   osc.addNativeIndicator('awesome-oscillator');
   osc.ready().then(() => osc.panes.collapse('price'));
+
+  // Time sync: checked every frame because live bars do not fire viewport:changed
+  const HALF_BAR = 30 * 1000;
+  const same = (a, b) => Math.abs(a.from - b.from) < HALF_BAR && Math.abs(a.to - b.to) < HALF_BAR;
+  let leader = chart, lastTouch = 0;
+  function mark(c) { return (e) => { if (e.type === 'pointermove' && !e.buttons) return; leader = c; lastTouch = Date.now(); }; }
+  [['chart', chart], ['osc', osc]].forEach(([id, c]) => {
+    const el = document.getElementById(id);
+    ['pointerdown', 'pointermove', 'wheel'].forEach((ev) => el.addEventListener(ev, mark(c), { passive: true }));
+  });
+  (function tick() {
+    const src = Date.now() - lastTouch < 2000 ? leader : chart;
+    const dst = src === chart ? osc : chart;
+    const a = src.getVisibleRange(), b = dst.getVisibleRange();
+    if (a && b && !same(a, b)) dst.setVisibleRange(a);
+    requestAnimationFrame(tick);
+  })();
 </script>
+
