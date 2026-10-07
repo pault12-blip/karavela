@@ -1,0 +1,12 @@
+<div id="chart" style="height:600px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@luxalgo/vela/dist/vela.global.min.js"></script>
+<script>
+  const chart = new Vela.Vela('#chart', {
+    symbol: 'coinbase:BTC-USD',
+    timeframe: '1',
+    theme: 'dark',
+    live: true
+  });
+  chart.data.registerProvider('coinbase', new Vela.CoinbaseProvider());
+</script>
+

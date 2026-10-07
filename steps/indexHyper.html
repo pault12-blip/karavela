@@ -1,0 +1,21 @@
+<div id="chart" style="height:600px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@luxalgo/vela/dist/vela.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@luxalgo/vela-pinets/dist/vela-pinets.global.min.js"></script>
+<script>
+  const chart = new Vela.Vela('#chart', {
+    symbol: 'coinbase:BTC-USD',
+    timeframe: '1',
+    theme: 'dark',
+    live: true
+  });
+  chart.data
+    .registerProvider('coinbase', new Vela.CoinbaseProvider())
+    .registerProvider('hyperliquid', new Vela.HyperliquidProvider());
+
+  // Pine overlay: Hyperliquid close as a line on the Coinbase candles
+  chart.registerEngine('pine', new VelaPinets.PineEngine());
+  chart.addIndicator(`//@version=6
+indicator("Hyperliquid BTC", overlay=true)
+plot(request.security("HYPERLIQUID:BTC", timeframe.period, close), "Hyperliquid", color.orange)`);
+</script>
+

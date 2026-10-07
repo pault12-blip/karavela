@@ -1,0 +1,41 @@
+<div id="chart" style="height:600px"></div>
+<script src="https://cdn.jsdelivr.net/npm/@luxalgo/vela/dist/vela.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@luxalgo/vela-pinets/dist/vela-pinets.global.min.js"></script>
+<script>
+  const chart = new Vela.Vela('#chart', {
+    symbol: 'coinbase:BTC-USD',
+    timeframe: '1',
+    theme: 'dark',
+    live: true
+  });
+  chart.data
+    .registerProvider('coinbase', new Vela.CoinbaseProvider())
+    .registerProvider('hyperliquid', new Vela.HyperliquidProvider());
+
+  chart.registerEngine('pine', new VelaPinets.PineEngine());
+
+  // Hyperliquid close as a line on the Coinbase candles
+  chart.addIndicator(`//@version=6
+indicator("Hyperliquid BTC", overlay=true)
+plot(request.security("HYPERLIQUID:BTC", timeframe.period, close), "Hyperliquid", color.orange)`);
+
+  // Bollinger Bands (20, 2)
+  chart.addIndicator(`//@version=6
+indicator("Bollinger Bands", overlay=true)
+[mid, upper, lower] = ta.bb(close, input.int(20, "Length"), input.float(2.0, "Mult"))
+plot(mid, "Basis", color.blue)
+plot(upper, "Upper", color.green)
+plot(lower, "Lower", color.red)`);
+
+  // Keltner Channel (EMA 20, ATR 10, mult 2)
+  chart.addIndicator(`//@version=6
+indicator("Keltner Channel", overlay=true)
+len = input.int(20, "EMA Length")
+atrLen = input.int(10, "ATR Length")
+mult = input.float(2.0, "Mult")
+basis = ta.ema(close, len)
+rng = ta.atr(atrLen)
+plot(basis, "Basis", color.gray)
+plot(basis + mult * rng, "Upper", color.purple)
+plot(basis - mult * rng, "Lower", color.purple)`);
+</script>
